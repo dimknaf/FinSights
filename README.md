@@ -4,12 +4,14 @@
 
 ### ▶ Live demo: **https://multi-agent-hackathon.vercel.app**
 
+### 🧠 Source engine: **[braindb](https://github.com/dimknaf/braindb)** — the continuous-memory project that produces the facts
+
 **Explainable relationship intelligence for markets — powered by [Prometheux](https://www.prometheux.ai/).**
 
 > Who's connected to whom, who's exposed to what — and the proof.
 
 FinSights turns a flat stream of company facts into a *reasoned, explainable* map. A side project
-(**braindb**) ingests news/filings into verified company entities + facts; one **SQL** query exports
+([**braindb**](https://github.com/dimknaf/braindb)) ingests news/filings into verified company entities + facts; one **SQL** query exports
 them; an **LLM** classifies each co‑mention into a clean relation (`supplies` / `invests_in` /
 `partners_with` / `competes_with`); then **Prometheux** does what SQL and LLMs can't — recursive,
 *explainable* reasoning that derives the **indirect connections** and **risk exposure** across the
