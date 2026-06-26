@@ -1,0 +1,25 @@
+# --- secrets (NEVER commit) ---
+*.env
+.env
+**/.env
+# keep templates
+!*.env.example
+!**/.env.example
+
+# --- private working dirs (not for the public repo) ---
+experiments/
+research/
+docs/
+info.md
+
+# --- python / venv / build ---
+**/.venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- vercel / node ---
+.vercel/
+node_modules/

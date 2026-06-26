@@ -1,0 +1,811 @@
+{
+  "project": "128c2be934a",
+  "platform": "https://platform.prometheux.ai",
+  "nodes": [
+    {
+      "id": "AI_datacenter",
+      "label": "AI-datacenter buildout",
+      "sector": "Theme",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "Microsoft",
+      "sector": "Tech",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "Google",
+      "sector": "Tech",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "Meta",
+      "sector": "Tech",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "Amazon",
+      "sector": "Tech",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "NVIDIA",
+      "sector": "Semis",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "AMD",
+      "sector": "Semis",
+      "origin": "braindb_news_v2"
+    },
+    {
+      "id": "Intel",
+      "sector": "Semis",
+      "origin": "braindb_news_v2"
+    },
+    {
+      "id": "Micron",
+      "sector": "Semis",
+      "origin": "braindb_news_v2"
+    },
+    {
+      "id": "Qualcomm",
+      "sector": "Semis",
+      "origin": "braindb_news_v2"
+    },
+    {
+      "id": "Chevron",
+      "sector": "Energy",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "HSBC",
+      "sector": "Finance",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "BioArctic",
+      "sector": "Pharma",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "Eli_Lilly",
+      "label": "Eli Lilly",
+      "sector": "Pharma",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "SpaceX",
+      "sector": "Space",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "WestTexasGasField",
+      "label": "West Texas gas field",
+      "sector": "Energy",
+      "origin": "braindb_news"
+    },
+    {
+      "id": "Smart_Sand",
+      "label": "Smart Sand (SND)",
+      "sector": "Materials",
+      "origin": "braindb (value-investing)"
+    },
+    {
+      "id": "OilGas_drilling",
+      "label": "oil & gas drilling",
+      "sector": "Energy",
+      "origin": "braindb (value-investing)"
+    },
+    {
+      "id": "In_basin_sand",
+      "label": "in-basin sand",
+      "sector": "Materials",
+      "origin": "braindb (value-investing)"
+    }
+  ],
+  "relations": [
+    {
+      "from": "Chevron",
+      "to": "Microsoft",
+      "type": "supplies",
+      "magnitude": 7,
+      "fact": "Chevron signed a 20-year power-purchase agreement to fuel a Microsoft gas-powered AI data center in West Texas.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "Chevron",
+      "to": "AI_datacenter",
+      "type": "supplies",
+      "magnitude": 6,
+      "fact": "Chevron is building a power plant to supply natural-gas power for the AI data-center buildout.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "Google",
+      "to": "HSBC",
+      "type": "supplies",
+      "magnitude": 5,
+      "fact": "Google Cloud supplies HSBC under a multi-year AI partnership announced 2026-06-17.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "Microsoft",
+      "to": "AI_datacenter",
+      "type": "invests_in",
+      "magnitude": 6,
+      "fact": "Microsoft is building one of the largest gas-powered AI data-center projects in the US.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "Google",
+      "to": "AI_datacenter",
+      "type": "invests_in",
+      "magnitude": 6,
+      "fact": "Google among Big Tech investing $750bn in AI infrastructure this year.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "Meta",
+      "to": "AI_datacenter",
+      "type": "invests_in",
+      "magnitude": 6,
+      "fact": "Meta investing hundreds of billions in AI infrastructure.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "Amazon",
+      "to": "AI_datacenter",
+      "type": "invests_in",
+      "magnitude": 6,
+      "fact": "Amazon among Big Tech investing in AI infrastructure.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "NVIDIA",
+      "to": "AI_datacenter",
+      "type": "supplies",
+      "magnitude": 8,
+      "fact": "NVIDIA GPUs power the AI data-center buildout.",
+      "source_db": "braindb_news_v2"
+    },
+    {
+      "from": "AMD",
+      "to": "AI_datacenter",
+      "type": "supplies",
+      "magnitude": 5,
+      "fact": "AMD data-center chips serve the AI buildout.",
+      "source_db": "braindb_news_v2"
+    },
+    {
+      "from": "NVIDIA",
+      "to": "AMD",
+      "type": "competes_with",
+      "magnitude": 6,
+      "fact": "NVIDIA and AMD compete in data-center accelerators.",
+      "source_db": "braindb_news_v2"
+    },
+    {
+      "from": "AMD",
+      "to": "Intel",
+      "type": "competes_with",
+      "magnitude": 6,
+      "fact": "AMD and Intel compete in CPUs.",
+      "source_db": "braindb_news_v2"
+    },
+    {
+      "from": "NVIDIA",
+      "to": "Intel",
+      "type": "competes_with",
+      "magnitude": 4,
+      "fact": "NVIDIA and Intel compete in AI/accelerated computing.",
+      "source_db": "braindb_news_v2"
+    },
+    {
+      "from": "AMD",
+      "to": "Micron",
+      "type": "competes_with",
+      "magnitude": 3,
+      "fact": "AMD and Micron co-occur across the semiconductor supply chain.",
+      "source_db": "braindb_news_v2"
+    },
+    {
+      "from": "NVIDIA",
+      "to": "Qualcomm",
+      "type": "competes_with",
+      "magnitude": 3,
+      "fact": "NVIDIA and Qualcomm co-occur as AI investment alternatives.",
+      "source_db": "braindb_news_v2"
+    },
+    {
+      "from": "BioArctic",
+      "to": "Eli_Lilly",
+      "type": "partners_with",
+      "magnitude": 5,
+      "fact": "BioArctic AB entered a research & collaboration agreement with Eli Lilly and Company.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "NVIDIA",
+      "to": "SpaceX",
+      "type": "competes_with",
+      "magnitude": 3,
+      "fact": "Analysts list Nvidia and SpaceX among investment alternatives for AI/space exposure.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "NVIDIA",
+      "to": "Google",
+      "type": "competes_with",
+      "magnitude": 3,
+      "fact": "Nvidia and Alphabet listed together as AI investment alternatives.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "WestTexasGasField",
+      "to": "Chevron",
+      "type": "supplies",
+      "magnitude": 5,
+      "fact": "West Texas gas fields supply the natural gas Chevron uses for its power agreements.",
+      "source_db": "braindb_news"
+    },
+    {
+      "from": "Smart_Sand",
+      "to": "OilGas_drilling",
+      "type": "supplies",
+      "magnitude": 6,
+      "fact": "Smart Sand (SND) produces silica sand used as proppants for hydraulic fracturing in oil & gas drilling.",
+      "source_db": "braindb (value-investing)"
+    },
+    {
+      "from": "OilGas_drilling",
+      "to": "AI_datacenter",
+      "type": "supplies",
+      "magnitude": 5,
+      "fact": "Oil & gas drilling produces the natural gas increasingly used to power AI data centers.",
+      "source_db": "braindb (value-investing) + braindb_news"
+    },
+    {
+      "from": "Smart_Sand",
+      "to": "In_basin_sand",
+      "type": "competes_with",
+      "magnitude": 5,
+      "fact": "Smart Sand faces structural headwinds from in-basin sand competition, compressing margins from $21 to ~$13-15/ton.",
+      "source_db": "braindb (value-investing)"
+    }
+  ],
+  "indirect": [
+    [
+      "AI_datacenter",
+      "HSBC"
+    ],
+    [
+      "AI_datacenter",
+      "In_basin_sand"
+    ],
+    [
+      "AI_datacenter",
+      "Intel"
+    ],
+    [
+      "AI_datacenter",
+      "Micron"
+    ],
+    [
+      "AI_datacenter",
+      "Qualcomm"
+    ],
+    [
+      "AI_datacenter",
+      "Smart_Sand"
+    ],
+    [
+      "AI_datacenter",
+      "SpaceX"
+    ],
+    [
+      "AI_datacenter",
+      "WestTexasGasField"
+    ],
+    [
+      "AMD",
+      "Amazon"
+    ],
+    [
+      "AMD",
+      "Chevron"
+    ],
+    [
+      "AMD",
+      "Google"
+    ],
+    [
+      "AMD",
+      "HSBC"
+    ],
+    [
+      "AMD",
+      "In_basin_sand"
+    ],
+    [
+      "AMD",
+      "Meta"
+    ],
+    [
+      "AMD",
+      "Microsoft"
+    ],
+    [
+      "AMD",
+      "OilGas_drilling"
+    ],
+    [
+      "AMD",
+      "Qualcomm"
+    ],
+    [
+      "AMD",
+      "Smart_Sand"
+    ],
+    [
+      "AMD",
+      "SpaceX"
+    ],
+    [
+      "AMD",
+      "WestTexasGasField"
+    ],
+    [
+      "Amazon",
+      "Chevron"
+    ],
+    [
+      "Amazon",
+      "Google"
+    ],
+    [
+      "Amazon",
+      "HSBC"
+    ],
+    [
+      "Amazon",
+      "In_basin_sand"
+    ],
+    [
+      "Amazon",
+      "Intel"
+    ],
+    [
+      "Amazon",
+      "Meta"
+    ],
+    [
+      "Amazon",
+      "Micron"
+    ],
+    [
+      "Amazon",
+      "Microsoft"
+    ],
+    [
+      "Amazon",
+      "NVIDIA"
+    ],
+    [
+      "Amazon",
+      "OilGas_drilling"
+    ],
+    [
+      "Amazon",
+      "Qualcomm"
+    ],
+    [
+      "Amazon",
+      "Smart_Sand"
+    ],
+    [
+      "Amazon",
+      "SpaceX"
+    ],
+    [
+      "Amazon",
+      "WestTexasGasField"
+    ],
+    [
+      "Chevron",
+      "Google"
+    ],
+    [
+      "Chevron",
+      "HSBC"
+    ],
+    [
+      "Chevron",
+      "In_basin_sand"
+    ],
+    [
+      "Chevron",
+      "Intel"
+    ],
+    [
+      "Chevron",
+      "Meta"
+    ],
+    [
+      "Chevron",
+      "Micron"
+    ],
+    [
+      "Chevron",
+      "NVIDIA"
+    ],
+    [
+      "Chevron",
+      "OilGas_drilling"
+    ],
+    [
+      "Chevron",
+      "Qualcomm"
+    ],
+    [
+      "Chevron",
+      "Smart_Sand"
+    ],
+    [
+      "Chevron",
+      "SpaceX"
+    ],
+    [
+      "Google",
+      "In_basin_sand"
+    ],
+    [
+      "Google",
+      "Intel"
+    ],
+    [
+      "Google",
+      "Meta"
+    ],
+    [
+      "Google",
+      "Micron"
+    ],
+    [
+      "Google",
+      "Microsoft"
+    ],
+    [
+      "Google",
+      "OilGas_drilling"
+    ],
+    [
+      "Google",
+      "Qualcomm"
+    ],
+    [
+      "Google",
+      "Smart_Sand"
+    ],
+    [
+      "Google",
+      "SpaceX"
+    ],
+    [
+      "Google",
+      "WestTexasGasField"
+    ],
+    [
+      "HSBC",
+      "In_basin_sand"
+    ],
+    [
+      "HSBC",
+      "Intel"
+    ],
+    [
+      "HSBC",
+      "Meta"
+    ],
+    [
+      "HSBC",
+      "Micron"
+    ],
+    [
+      "HSBC",
+      "Microsoft"
+    ],
+    [
+      "HSBC",
+      "NVIDIA"
+    ],
+    [
+      "HSBC",
+      "OilGas_drilling"
+    ],
+    [
+      "HSBC",
+      "Qualcomm"
+    ],
+    [
+      "HSBC",
+      "Smart_Sand"
+    ],
+    [
+      "HSBC",
+      "SpaceX"
+    ],
+    [
+      "HSBC",
+      "WestTexasGasField"
+    ],
+    [
+      "In_basin_sand",
+      "Intel"
+    ],
+    [
+      "In_basin_sand",
+      "Meta"
+    ],
+    [
+      "In_basin_sand",
+      "Micron"
+    ],
+    [
+      "In_basin_sand",
+      "Microsoft"
+    ],
+    [
+      "In_basin_sand",
+      "NVIDIA"
+    ],
+    [
+      "In_basin_sand",
+      "OilGas_drilling"
+    ],
+    [
+      "In_basin_sand",
+      "Qualcomm"
+    ],
+    [
+      "In_basin_sand",
+      "SpaceX"
+    ],
+    [
+      "In_basin_sand",
+      "WestTexasGasField"
+    ],
+    [
+      "Intel",
+      "Meta"
+    ],
+    [
+      "Intel",
+      "Micron"
+    ],
+    [
+      "Intel",
+      "Microsoft"
+    ],
+    [
+      "Intel",
+      "OilGas_drilling"
+    ],
+    [
+      "Intel",
+      "Qualcomm"
+    ],
+    [
+      "Intel",
+      "Smart_Sand"
+    ],
+    [
+      "Intel",
+      "SpaceX"
+    ],
+    [
+      "Intel",
+      "WestTexasGasField"
+    ],
+    [
+      "Meta",
+      "Micron"
+    ],
+    [
+      "Meta",
+      "Microsoft"
+    ],
+    [
+      "Meta",
+      "NVIDIA"
+    ],
+    [
+      "Meta",
+      "OilGas_drilling"
+    ],
+    [
+      "Meta",
+      "Qualcomm"
+    ],
+    [
+      "Meta",
+      "Smart_Sand"
+    ],
+    [
+      "Meta",
+      "SpaceX"
+    ],
+    [
+      "Meta",
+      "WestTexasGasField"
+    ],
+    [
+      "Micron",
+      "Microsoft"
+    ],
+    [
+      "Micron",
+      "NVIDIA"
+    ],
+    [
+      "Micron",
+      "OilGas_drilling"
+    ],
+    [
+      "Micron",
+      "Qualcomm"
+    ],
+    [
+      "Micron",
+      "Smart_Sand"
+    ],
+    [
+      "Micron",
+      "SpaceX"
+    ],
+    [
+      "Micron",
+      "WestTexasGasField"
+    ],
+    [
+      "Microsoft",
+      "NVIDIA"
+    ],
+    [
+      "Microsoft",
+      "OilGas_drilling"
+    ],
+    [
+      "Microsoft",
+      "Qualcomm"
+    ],
+    [
+      "Microsoft",
+      "Smart_Sand"
+    ],
+    [
+      "Microsoft",
+      "SpaceX"
+    ],
+    [
+      "Microsoft",
+      "WestTexasGasField"
+    ],
+    [
+      "NVIDIA",
+      "OilGas_drilling"
+    ],
+    [
+      "NVIDIA",
+      "Smart_Sand"
+    ],
+    [
+      "NVIDIA",
+      "WestTexasGasField"
+    ],
+    [
+      "OilGas_drilling",
+      "Qualcomm"
+    ],
+    [
+      "OilGas_drilling",
+      "SpaceX"
+    ],
+    [
+      "OilGas_drilling",
+      "WestTexasGasField"
+    ],
+    [
+      "Qualcomm",
+      "Smart_Sand"
+    ],
+    [
+      "Qualcomm",
+      "SpaceX"
+    ],
+    [
+      "Qualcomm",
+      "WestTexasGasField"
+    ],
+    [
+      "Smart_Sand",
+      "SpaceX"
+    ],
+    [
+      "Smart_Sand",
+      "WestTexasGasField"
+    ],
+    [
+      "SpaceX",
+      "WestTexasGasField"
+    ]
+  ],
+  "exposed": [
+    [
+      "AMD",
+      "direct supplier"
+    ],
+    [
+      "Amazon",
+      "direct investor"
+    ],
+    [
+      "Chevron",
+      "direct supplier"
+    ],
+    [
+      "Chevron",
+      "via supply chain"
+    ],
+    [
+      "Google",
+      "direct investor"
+    ],
+    [
+      "Meta",
+      "direct investor"
+    ],
+    [
+      "Microsoft",
+      "direct investor"
+    ],
+    [
+      "NVIDIA",
+      "direct supplier"
+    ],
+    [
+      "OilGas_drilling",
+      "direct supplier"
+    ],
+    [
+      "Smart_Sand",
+      "via supply chain"
+    ],
+    [
+      "WestTexasGasField",
+      "via supply chain"
+    ]
+  ],
+  "centrality": {
+    "Google": 0.0644,
+    "Meta": 0.025,
+    "Eli_Lilly": 0.0526,
+    "SpaceX": 0.0251,
+    "Smart_Sand": 0.0555,
+    "WestTexasGasField": 0.0267,
+    "BioArctic": 0.0526,
+    "Qualcomm": 0.0251,
+    "AMD": 0.0816,
+    "HSBC": 0.0262,
+    "Microsoft": 0.0438,
+    "NVIDIA": 0.1213,
+    "AI_datacenter": 0.1616,
+    "Micron": 0.0253,
+    "Chevron": 0.0663,
+    "OilGas_drilling": 0.0483,
+    "In_basin_sand": 0.0312,
+    "Amazon": 0.025,
+    "Intel": 0.0425
+  },
+  "headline": "A West Texas gas field and Smart Sand (a value stock) are both exposed to the AI-datacenter buildout \u2014 derived by Prometheux, with the chain."
+}

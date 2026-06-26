@@ -1,0 +1,19 @@
+% FinSights — Vadalog rules. Input: relation(From, To, Type) facts (the braindb export).
+% These derive what SQL/an LLM can't do reliably: the recursive, explainable layer.
+
+% undirected edge view (a connection is a connection)
+edge(A, B) <- relation(A, B, _).
+edge(B, A) <- relation(A, B, _).
+
+% INDIRECT connections: transitive closure (any number of hops)
+connected(A, B) <- edge(A, B).
+connected(A, C) <- edge(A, B), connected(B, C).
+
+% AI-datacenter EXPOSURE, recursive + explainable (the reason is carried in arg 2)
+ai_exposed(X, "direct investor")  <- relation(X, "AI_datacenter", "invests_in").
+ai_exposed(X, "direct supplier")  <- relation(X, "AI_datacenter", "supplies").
+ai_exposed(X, "via supply chain") <- relation(X, Y, "supplies"), ai_exposed(Y, _).
+
+@output("edge").
+@output("connected").
+@output("ai_exposed").

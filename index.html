@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FinSights — explainable relationship intelligence (Prometheux)</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+:root{--bg:#0b0e14;--panel:#11161f;--line:#222b38;--txt:#e8edf3;--mut:#8b97a7;--px:#3fb950}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+header{padding:14px 20px;background:linear-gradient(90deg,#11161f,#0b0e14);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{margin:0;font-size:20px;font-weight:800}header .tag{color:var(--mut);font-size:13px}
+.badge{background:#0f2a1b;color:var(--px);border:1px solid #1f6f44;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700}
+.pipe{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 20px;background:#0e131b;border-bottom:1px solid var(--line);font-size:12px;color:var(--mut)}
+.pipe b{color:var(--txt)}.pipe .step{background:#11161f;border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.pipe .arr{color:var(--px)}
+details{margin-left:auto}summary{cursor:pointer;color:var(--px)}
+pre{background:#0b0e14;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11px;overflow:auto;max-width:560px;color:#9ad}
+#wrap{display:flex;height:calc(100vh - 112px)}#net{flex:1}
+#side{width:350px;background:var(--panel);border-left:1px solid var(--line);padding:14px;overflow:auto;font-size:13px}
+h3{margin:14px 0 8px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:1px}
+#insight{background:#10261b;border:1px solid #1f6f44;border-radius:8px;padding:11px;font-size:12px;line-height:1.5}
+#insight b{color:var(--px)}
+.ctl{margin:5px 0}.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.card{background:#0e131b;border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:7px 0}
+.tag2{display:inline-block;font-size:10px;padding:1px 7px;border-radius:20px;margin-left:5px}
+.fact{color:var(--mut);font-style:italic;margin-top:6px;font-size:12px}
+footer{padding:7px 20px;font-size:11px;color:var(--mut);background:var(--panel);border-top:1px solid var(--line)}
+a{color:var(--px)}
+</style></head><body>
+<header>
+  <h1>FinSights</h1><span class="tag">who's connected to whom, who's exposed to what — and the proof.</span>
+  <span class="badge">⬢ reasoning by Prometheux</span>
+</header>
+<div class="pipe">
+  <span class="step"><b>braindb</b> wikis+facts</span><span class="arr">→</span>
+  <span class="step"><b>SQL</b> export</span><span class="arr">→</span>
+  <span class="step"><b>LLM</b> classify</span><span class="arr">→</span>
+  <span class="step" style="border-color:#1f6f44;color:var(--px)"><b>Prometheux</b> reason</span><span class="arr">→</span>
+  <span class="step">this dashboard</span>
+  <details><summary>view the braindb SQL export</summary><pre>-- braindb_export.sql
+-- Run (read-only) against a braindb Postgres to EXPORT the raw material for the
+-- relation graph. braindb stores verified entities as `wiki` rows and atomic
+-- `fact` rows; a relation candidate is any fact that co-mentions two verified
+-- company wikis. The LLM then classifies each into a relation type (see facts.json).
+--
+--   psql "$DATABASE_URL" -f data/braindb_export.sql
+--
+-- Output columns: company_a | company_b | fact   (one row per co-mention)
+
+WITH companies AS (
+    SELECT e.id, coalesce(w.canonical_name, e.title) AS name
+    FROM entities e
+    JOIN wikis_ext w ON w.entity_id = e.id
+    WHERE e.entity_type = 'wiki'
+      AND length(coalesce(w.canonical_name, e.title)) &gt;= 4
+),
+facts AS (
+    SELECT id, content
+    FROM entities
+    WHERE entity_type = 'fact'
+)
+SELECT a.name  AS company_a,
+       b.name  AS company_b,
+       f.content AS fact
+FROM   facts f
+JOIN   companies a ON f.content ILIKE '%' || a.name || '%'
+JOIN   companies b ON f.content ILIKE '%' || b.name || '%'
+                  AND a.name &lt; b.name          -- unordered pair, no self-join dup
+ORDER  BY company_a, company_b;
+</pre></details>
+</div>
+<div id="wrap"><div id="net"></div>
+<div id="side">
+  <h3>⬢ Prometheux insights</h3><div id="insight"></div>
+  <h3>Layers</h3>
+  <div class="ctl"><label><input type="checkbox" id="ind" checked> Prometheux indirect links (dashed)</label></div>
+  <div class="ctl"><label><input type="checkbox" id="exp"> highlight AI-datacenter exposure</label></div>
+  <h3>Relation types</h3><div id="filters"></div>
+  <h3>Details</h3><div id="info">Click a node or an edge.</div>
+</div></div>
+<footer>Data: braindb export (news + value-investing wikis) → LLM → Prometheux (Vadalog). Live project on
+<a href="https://platform.prometheux.ai" target="_blank">platform.prometheux.ai</a> · project 128c2be934a · node size = PageRank centrality.</footer>
+<script>
+const DATA = {"nodes": [{"id": "AI_datacenter", "label": "AI-datacenter buildout", "sector": "Theme", "origin": "braindb_news"}, {"id": "Microsoft", "sector": "Tech", "origin": "braindb_news"}, {"id": "Google", "sector": "Tech", "origin": "braindb_news"}, {"id": "Meta", "sector": "Tech", "origin": "braindb_news"}, {"id": "Amazon", "sector": "Tech", "origin": "braindb_news"}, {"id": "NVIDIA", "sector": "Semis", "origin": "braindb_news"}, {"id": "AMD", "sector": "Semis", "origin": "braindb_news_v2"}, {"id": "Intel", "sector": "Semis", "origin": "braindb_news_v2"}, {"id": "Micron", "sector": "Semis", "origin": "braindb_news_v2"}, {"id": "Qualcomm", "sector": "Semis", "origin": "braindb_news_v2"}, {"id": "Chevron", "sector": "Energy", "origin": "braindb_news"}, {"id": "HSBC", "sector": "Finance", "origin": "braindb_news"}, {"id": "BioArctic", "sector": "Pharma", "origin": "braindb_news"}, {"id": "Eli_Lilly", "label": "Eli Lilly", "sector": "Pharma", "origin": "braindb_news"}, {"id": "SpaceX", "sector": "Space", "origin": "braindb_news"}, {"id": "WestTexasGasField", "label": "West Texas gas field", "sector": "Energy", "origin": "braindb_news"}, {"id": "Smart_Sand", "label": "Smart Sand (SND)", "sector": "Materials", "origin": "braindb (value-investing)"}, {"id": "OilGas_drilling", "label": "oil & gas drilling", "sector": "Energy", "origin": "braindb (value-investing)"}, {"id": "In_basin_sand", "label": "in-basin sand", "sector": "Materials", "origin": "braindb (value-investing)"}], "relations": [{"from": "Chevron", "to": "Microsoft", "type": "supplies", "magnitude": 7, "fact": "Chevron signed a 20-year power-purchase agreement to fuel a Microsoft gas-powered AI data center in West Texas.", "source_db": "braindb_news"}, {"from": "Chevron", "to": "AI_datacenter", "type": "supplies", "magnitude": 6, "fact": "Chevron is building a power plant to supply natural-gas power for the AI data-center buildout.", "source_db": "braindb_news"}, {"from": "Google", "to": "HSBC", "type": "supplies", "magnitude": 5, "fact": "Google Cloud supplies HSBC under a multi-year AI partnership announced 2026-06-17.", "source_db": "braindb_news"}, {"from": "Microsoft", "to": "AI_datacenter", "type": "invests_in", "magnitude": 6, "fact": "Microsoft is building one of the largest gas-powered AI data-center projects in the US.", "source_db": "braindb_news"}, {"from": "Google", "to": "AI_datacenter", "type": "invests_in", "magnitude": 6, "fact": "Google among Big Tech investing $750bn in AI infrastructure this year.", "source_db": "braindb_news"}, {"from": "Meta", "to": "AI_datacenter", "type": "invests_in", "magnitude": 6, "fact": "Meta investing hundreds of billions in AI infrastructure.", "source_db": "braindb_news"}, {"from": "Amazon", "to": "AI_datacenter", "type": "invests_in", "magnitude": 6, "fact": "Amazon among Big Tech investing in AI infrastructure.", "source_db": "braindb_news"}, {"from": "NVIDIA", "to": "AI_datacenter", "type": "supplies", "magnitude": 8, "fact": "NVIDIA GPUs power the AI data-center buildout.", "source_db": "braindb_news_v2"}, {"from": "AMD", "to": "AI_datacenter", "type": "supplies", "magnitude": 5, "fact": "AMD data-center chips serve the AI buildout.", "source_db": "braindb_news_v2"}, {"from": "NVIDIA", "to": "AMD", "type": "competes_with", "magnitude": 6, "fact": "NVIDIA and AMD compete in data-center accelerators.", "source_db": "braindb_news_v2"}, {"from": "AMD", "to": "Intel", "type": "competes_with", "magnitude": 6, "fact": "AMD and Intel compete in CPUs.", "source_db": "braindb_news_v2"}, {"from": "NVIDIA", "to": "Intel", "type": "competes_with", "magnitude": 4, "fact": "NVIDIA and Intel compete in AI/accelerated computing.", "source_db": "braindb_news_v2"}, {"from": "AMD", "to": "Micron", "type": "competes_with", "magnitude": 3, "fact": "AMD and Micron co-occur across the semiconductor supply chain.", "source_db": "braindb_news_v2"}, {"from": "NVIDIA", "to": "Qualcomm", "type": "competes_with", "magnitude": 3, "fact": "NVIDIA and Qualcomm co-occur as AI investment alternatives.", "source_db": "braindb_news_v2"}, {"from": "BioArctic", "to": "Eli_Lilly", "type": "partners_with", "magnitude": 5, "fact": "BioArctic AB entered a research & collaboration agreement with Eli Lilly and Company.", "source_db": "braindb_news"}, {"from": "NVIDIA", "to": "SpaceX", "type": "competes_with", "magnitude": 3, "fact": "Analysts list Nvidia and SpaceX among investment alternatives for AI/space exposure.", "source_db": "braindb_news"}, {"from": "NVIDIA", "to": "Google", "type": "competes_with", "magnitude": 3, "fact": "Nvidia and Alphabet listed together as AI investment alternatives.", "source_db": "braindb_news"}, {"from": "WestTexasGasField", "to": "Chevron", "type": "supplies", "magnitude": 5, "fact": "West Texas gas fields supply the natural gas Chevron uses for its power agreements.", "source_db": "braindb_news"}, {"from": "Smart_Sand", "to": "OilGas_drilling", "type": "supplies", "magnitude": 6, "fact": "Smart Sand (SND) produces silica sand used as proppants for hydraulic fracturing in oil & gas drilling.", "source_db": "braindb (value-investing)"}, {"from": "OilGas_drilling", "to": "AI_datacenter", "type": "supplies", "magnitude": 5, "fact": "Oil & gas drilling produces the natural gas increasingly used to power AI data centers.", "source_db": "braindb (value-investing) + braindb_news"}, {"from": "Smart_Sand", "to": "In_basin_sand", "type": "competes_with", "magnitude": 5, "fact": "Smart Sand faces structural headwinds from in-basin sand competition, compressing margins from $21 to ~$13-15/ton.", "source_db": "braindb (value-investing)"}], "exposed": [["AMD", "direct supplier"], ["Amazon", "direct investor"], ["Chevron", "direct supplier"], ["Chevron", "via supply chain"], ["Google", "direct investor"], ["Meta", "direct investor"], ["Microsoft", "direct investor"], ["NVIDIA", "direct supplier"], ["OilGas_drilling", "direct supplier"], ["Smart_Sand", "via supply chain"], ["WestTexasGasField", "via supply chain"]], "centrality": {"Google": 0.0644, "Meta": 0.025, "Eli_Lilly": 0.0526, "SpaceX": 0.0251, "Smart_Sand": 0.0555, "WestTexasGasField": 0.0267, "BioArctic": 0.0526, "Qualcomm": 0.0251, "AMD": 0.0816, "HSBC": 0.0262, "Microsoft": 0.0438, "NVIDIA": 0.1213, "AI_datacenter": 0.1616, "Micron": 0.0253, "Chevron": 0.0663, "OilGas_drilling": 0.0483, "In_basin_sand": 0.0312, "Amazon": 0.025, "Intel": 0.0425}, "indirect": [["AI_datacenter", "HSBC"], ["AI_datacenter", "In_basin_sand"], ["AI_datacenter", "Intel"], ["AI_datacenter", "Micron"], ["AI_datacenter", "Qualcomm"], ["AI_datacenter", "Smart_Sand"], ["AI_datacenter", "SpaceX"], ["AI_datacenter", "WestTexasGasField"], ["AMD", "Amazon"], ["AMD", "Chevron"], ["AMD", "Google"], ["AMD", "HSBC"], ["AMD", "In_basin_sand"], ["AMD", "Meta"], ["AMD", "Microsoft"], ["AMD", "OilGas_drilling"], ["AMD", "Qualcomm"], ["AMD", "Smart_Sand"], ["AMD", "SpaceX"], ["AMD", "WestTexasGasField"], ["Amazon", "Chevron"], ["Amazon", "Google"], ["Amazon", "HSBC"], ["Amazon", "In_basin_sand"], ["Amazon", "Intel"], ["Amazon", "Meta"], ["Amazon", "Micron"], ["Amazon", "Microsoft"], ["Amazon", "NVIDIA"], ["Amazon", "OilGas_drilling"], ["Amazon", "Qualcomm"], ["Amazon", "Smart_Sand"], ["Amazon", "SpaceX"], ["Amazon", "WestTexasGasField"], ["Chevron", "Google"], ["Chevron", "HSBC"], ["Chevron", "In_basin_sand"], ["Chevron", "Intel"], ["Chevron", "Meta"], ["Chevron", "Micron"], ["Chevron", "NVIDIA"], ["Chevron", "OilGas_drilling"], ["Chevron", "Qualcomm"], ["Chevron", "Smart_Sand"], ["Chevron", "SpaceX"], ["Google", "In_basin_sand"], ["Google", "Intel"], ["Google", "Meta"], ["Google", "Micron"], ["Google", "Microsoft"], ["Google", "OilGas_drilling"], ["Google", "Qualcomm"], ["Google", "Smart_Sand"], ["Google", "SpaceX"], ["Google", "WestTexasGasField"], ["HSBC", "In_basin_sand"], ["HSBC", "Intel"], ["HSBC", "Meta"], ["HSBC", "Micron"], ["HSBC", "Microsoft"], ["HSBC", "NVIDIA"], ["HSBC", "OilGas_drilling"], ["HSBC", "Qualcomm"], ["HSBC", "Smart_Sand"], ["HSBC", "SpaceX"], ["HSBC", "WestTexasGasField"], ["In_basin_sand", "Intel"], ["In_basin_sand", "Meta"], ["In_basin_sand", "Micron"], ["In_basin_sand", "Microsoft"], ["In_basin_sand", "NVIDIA"], ["In_basin_sand", "OilGas_drilling"], ["In_basin_sand", "Qualcomm"], ["In_basin_sand", "SpaceX"], ["In_basin_sand", "WestTexasGasField"], ["Intel", "Meta"], ["Intel", "Micron"], ["Intel", "Microsoft"], ["Intel", "OilGas_drilling"], ["Intel", "Qualcomm"], ["Intel", "Smart_Sand"], ["Intel", "SpaceX"], ["Intel", "WestTexasGasField"], ["Meta", "Micron"], ["Meta", "Microsoft"], ["Meta", "NVIDIA"], ["Meta", "OilGas_drilling"], ["Meta", "Qualcomm"], ["Meta", "Smart_Sand"], ["Meta", "SpaceX"], ["Meta", "WestTexasGasField"], ["Micron", "Microsoft"], ["Micron", "NVIDIA"], ["Micron", "OilGas_drilling"], ["Micron", "Qualcomm"], ["Micron", "Smart_Sand"], ["Micron", "SpaceX"], ["Micron", "WestTexasGasField"], ["Microsoft", "NVIDIA"], ["Microsoft", "OilGas_drilling"], ["Microsoft", "Qualcomm"], ["Microsoft", "Smart_Sand"], ["Microsoft", "SpaceX"], ["Microsoft", "WestTexasGasField"], ["NVIDIA", "OilGas_drilling"], ["NVIDIA", "Smart_Sand"], ["NVIDIA", "WestTexasGasField"], ["OilGas_drilling", "Qualcomm"], ["OilGas_drilling", "SpaceX"], ["OilGas_drilling", "WestTexasGasField"], ["Qualcomm", "Smart_Sand"], ["Qualcomm", "SpaceX"], ["Qualcomm", "WestTexasGasField"], ["Smart_Sand", "SpaceX"], ["Smart_Sand", "WestTexasGasField"], ["SpaceX", "WestTexasGasField"]], "headline": "A West Texas gas field and Smart Sand (a value stock) are both exposed to the AI-datacenter buildout \u2014 derived by Prometheux, with the chain.", "project": "128c2be934a", "sql": "-- braindb_export.sql\n-- Run (read-only) against a braindb Postgres to EXPORT the raw material for the\n-- relation graph. braindb stores verified entities as `wiki` rows and atomic\n-- `fact` rows; a relation candidate is any fact that co-mentions two verified\n-- company wikis. The LLM then classifies each into a relation type (see facts.json).\n--\n--   psql \"$DATABASE_URL\" -f data/braindb_export.sql\n--\n-- Output columns: company_a | company_b | fact   (one row per co-mention)\n\nWITH companies AS (\n    SELECT e.id, coalesce(w.canonical_name, e.title) AS name\n    FROM entities e\n    JOIN wikis_ext w ON w.entity_id = e.id\n    WHERE e.entity_type = 'wiki'\n      AND length(coalesce(w.canonical_name, e.title)) >= 4\n),\nfacts AS (\n    SELECT id, content\n    FROM entities\n    WHERE entity_type = 'fact'\n)\nSELECT a.name  AS company_a,\n       b.name  AS company_b,\n       f.content AS fact\nFROM   facts f\nJOIN   companies a ON f.content ILIKE '%' || a.name || '%'\nJOIN   companies b ON f.content ILIKE '%' || b.name || '%'\n                  AND a.name < b.name          -- unordered pair, no self-join dup\nORDER  BY company_a, company_b;\n"};
+const SECTOR={Tech:"#4f8cff",Semis:"#00bcd4",Energy:"#ff9800",Pharma:"#4caf50",Space:"#9c27b0",Finance:"#e3b341",Materials:"#c9a227",Theme:"#8b949e"};
+const ETYPE={supplies:"#db6d28",invests_in:"#8957e5",partners_with:"#2ea043",competes_with:"#e5534b"};
+const C=DATA.centrality||{}, expReason={}; DATA.exposed.forEach(([n,r])=>{if(!expReason[n])expReason[n]=r;});
+const lbl=id=>(DATA.nodes.find(n=>n.id===id)||{}).label||id.replace(/_/g," ");
+
+const nodes=new vis.DataSet(DATA.nodes.map(n=>({
+  id:n.id,label:n.label||n.id.replace(/_/g," "),
+  color:{background:SECTOR[n.sector]||"#888",border:SECTOR[n.sector]||"#888"},
+  font:{color:"#fff",size:13},shape:"dot",size:14+(C[n.id]||0.02)*150,
+  _sector:n.sector,_exp:expReason[n.id]||null
+})));
+const dEdges=DATA.relations.map((r,i)=>({id:"d"+i,from:r.from,to:r.to,etype:r.type,fact:r.fact,mag:r.magnitude,
+  arrows:"to",color:{color:ETYPE[r.type],highlight:ETYPE[r.type]},width:Math.max(1.2,(r.magnitude||4)/2),
+  title:r.type+" · mag "+(r.magnitude||"")}));
+const iEdges=DATA.indirect.map((p,i)=>({id:"i"+i,from:p[0],to:p[1],kind:"ind",dashes:true,color:{color:"#5b6675"},width:0.7}));
+const edges=new vis.DataSet([]);
+const net=new vis.Network(document.getElementById("net"),{nodes,edges},
+  {physics:{stabilization:true,barnesHut:{springLength:150,gravitationalConstant:-6000}},interaction:{hover:true}});
+
+const active=new Set(Object.keys(ETYPE)), show={ind:true,exp:false};
+function refresh(){
+  const es=dEdges.filter(e=>active.has(e.etype)).slice();
+  if(show.ind) es.push(...iEdges);
+  edges.clear(); edges.add(es);
+  nodes.update(DATA.nodes.map(n=>{
+    const exposed=!!expReason[n.id];
+    const dim=show.exp&&!exposed;
+    const glow=show.exp&&exposed;
+    return {id:n.id,opacity:dim?0.25:1,
+      borderWidth:glow?4:1,
+      color:{background:SECTOR[n.sector]||"#888",border:glow?(expReason[n.id]==="via supply chain"?"#ff7b72":"#f0a500"):(SECTOR[n.sector]||"#888")},
+      shadow:glow?{enabled:true,color:expReason[n.id]==="via supply chain"?"#ff7b72":"#f0a500",size:24,x:0,y:0}:false};
+  }));
+}
+document.getElementById("ind").onchange=e=>{show.ind=e.target.checked;refresh();};
+document.getElementById("exp").onchange=e=>{show.exp=e.target.checked;refresh();};
+const fdiv=document.getElementById("filters");
+Object.keys(ETYPE).forEach(t=>fdiv.innerHTML+=`<div class="ctl"><label><input type="checkbox" id="f_${t}" checked> <span class="sw" style="background:${ETYPE[t]}"></span>${t}</label></div>`);
+Object.keys(ETYPE).forEach(t=>document.getElementById("f_"+t).onchange=e=>{e.target.checked?active.add(t):active.delete(t);refresh();});
+
+// insights panel
+const topC=Object.entries(C).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${lbl(k)} (${v})`).join(", ");
+const chainExp=DATA.exposed.filter(([n,r])=>r==="via supply chain").map(([n])=>lbl(n));
+document.getElementById("insight").innerHTML=`
+  <b>${DATA.indirect.length} indirect connections</b> derived (transitive — in no single fact).<br><br>
+  <b>${DATA.exposed.length} entities exposed</b> to the AI-datacenter buildout. Most striking (via supply chain): <b>${chainExp.map(x=>x).join(", ")}</b>.<br><br>
+  <b>Most central</b> (PageRank): ${topC}.<br><br>
+  🔥 ${DATA.headline}`;
+
+const info=document.getElementById("info");
+net.on("click",p=>{
+  if(p.edges.length&&!p.nodes.length){const id=p.edges[0];const d=dEdges.find(e=>e.id===id);
+    if(d) info.innerHTML=`<b>${lbl(d.from)} → ${lbl(d.to)}</b> <span class="tag2" style="background:${ETYPE[d.etype]}">${d.etype}</span><div class="fact">"${d.fact}"</div>`;
+    else info.innerHTML=`<b>indirect link</b> <span class="tag2" style="background:#3fb950">Prometheux-derived</span><br>connected only through a chain — in no single fact.`;
+  } else if(p.nodes.length){const n=p.nodes[0];
+    const dl=dEdges.filter(e=>e.from===n||e.to===n).map(e=>`• ${e.from===n?"→ "+lbl(e.to):"← "+lbl(e.from)} (${e.etype})`);
+    const ex=expReason[n]?`<br><span style="color:#3fb950">AI-exposed:</span> ${expReason[n]}`:"";
+    info.innerHTML=`<b>${lbl(n)}</b>${ex}<br>${dl.join("<br>")||"(no direct relations)"}`;}
+});
+refresh();
+</script></body></html>

@@ -1,0 +1,13 @@
+{
+  "_about": "Source facts braindb extracted from news/filings. An LLM turned each into one typed relation (the `relation` field). This step is offline here but COULD BE LIVE (an LLM call per new fact as braindb ingests it).",
+  "facts": [
+    {"fact": "Chevron signed a 20-year power-purchase agreement to fuel a Microsoft gas-powered AI data center in West Texas.", "entities": ["Chevron", "Microsoft"], "relation": "supplies(Chevron -> Microsoft)"},
+    {"fact": "Google Cloud announced a multi-year partnership with HSBC on 2026-06-17 to deploy AI across HSBC's global operations.", "entities": ["Google", "HSBC"], "relation": "supplies(Google -> HSBC)"},
+    {"fact": "Google, Microsoft, Amazon and Meta are collectively investing ~$750bn in AI infrastructure this year.", "entities": ["Google", "Microsoft", "Amazon", "Meta", "AI_datacenter"], "relation": "invests_in(each -> AI_datacenter)"},
+    {"fact": "BioArctic AB entered a research & collaboration agreement with Eli Lilly and Company.", "entities": ["BioArctic", "Eli_Lilly"], "relation": "partners_with(BioArctic <-> Eli Lilly)"},
+    {"fact": "Market analysts list Nvidia, Alphabet and Redwire as investment alternatives to SpaceX for AI/space exposure.", "entities": ["NVIDIA", "Google", "SpaceX"], "relation": "competes_with(NVIDIA <-> SpaceX, Google)"},
+    {"fact": "Smart Sand (SND) produces silica sand used as proppants for hydraulic fracturing in oil & gas drilling.", "entities": ["Smart_Sand", "OilGas_drilling"], "relation": "supplies(Smart Sand -> oil & gas drilling)"},
+    {"fact": "Oil & gas drilling produces the natural gas increasingly used to power AI data centers (e.g. the Chevron-Microsoft deal).", "entities": ["OilGas_drilling", "AI_datacenter"], "relation": "supplies(oil & gas drilling -> AI_datacenter)"},
+    {"fact": "Smart Sand faces structural headwinds from in-basin sand competition, compressing margins from $21 to ~$13-15/ton.", "entities": ["Smart_Sand", "In_basin_sand"], "relation": "competes_with(Smart Sand <-> in-basin sand)"}
+  ]
+}
