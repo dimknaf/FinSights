@@ -1,0 +1,15 @@
+# never upload these to Vercel (secrets / scratch / local)
+experiments/
+research/
+docs/
+info.md
+*.env
+.env
+**/.env
+**/.venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/

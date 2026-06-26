@@ -23,3 +23,5 @@ __pycache__/
 # --- vercel / node ---
 .vercel/
 node_modules/
+
+.vercel

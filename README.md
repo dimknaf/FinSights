@@ -1,5 +1,7 @@
 # FinSights
 
+### ▶ Live demo: **https://multi-agent-hackathon.vercel.app**
+
 **Explainable relationship intelligence for markets — powered by [Prometheux](https://www.prometheux.ai/).**
 
 > Who's connected to whom, who's exposed to what — and the proof.

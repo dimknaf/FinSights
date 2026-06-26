@@ -71,10 +71,11 @@ ORDER  BY company_a, company_b;
 <div id="side">
   <h3>⬢ Prometheux insights</h3><div id="insight"></div>
   <h3>Layers</h3>
-  <div class="ctl"><label><input type="checkbox" id="ind" checked> Prometheux indirect links (dashed)</label></div>
+  <div class="ctl"><label><input type="checkbox" id="ind"> show <b>all</b> Prometheux indirect links</label></div>
+  <div class="ctl" style="color:var(--mut);font-size:11px;margin:-3px 0 4px">tip: click any node to reveal just <i>its</i> derived (indirect) links</div>
   <div class="ctl"><label><input type="checkbox" id="exp"> highlight AI-datacenter exposure</label></div>
   <h3>Relation types</h3><div id="filters"></div>
-  <h3>Details</h3><div id="info">Click a node or an edge.</div>
+  <h3>Details</h3><div id="info">Click a node to reveal its relations and Prometheux-derived links.</div>
 </div></div>
 <footer>Data: braindb export (news + value-investing wikis) → LLM → Prometheux (Vadalog). Live project on
 <a href="https://platform.prometheux.ai" target="_blank">platform.prometheux.ai</a> · project 128c2be934a · node size = PageRank centrality.</footer>
@@ -91,18 +92,40 @@ const nodes=new vis.DataSet(DATA.nodes.map(n=>({
   font:{color:"#fff",size:13},shape:"dot",size:14+(C[n.id]||0.02)*150,
   _sector:n.sector,_exp:expReason[n.id]||null
 })));
+const SYM={competes_with:1,partners_with:1};  // mutual -> double-headed (not one-way)
 const dEdges=DATA.relations.map((r,i)=>({id:"d"+i,from:r.from,to:r.to,etype:r.type,fact:r.fact,mag:r.magnitude,
-  arrows:"to",color:{color:ETYPE[r.type],highlight:ETYPE[r.type]},width:Math.max(1.2,(r.magnitude||4)/2),
-  title:r.type+" · mag "+(r.magnitude||"")}));
-const iEdges=DATA.indirect.map((p,i)=>({id:"i"+i,from:p[0],to:p[1],kind:"ind",dashes:true,color:{color:"#5b6675"},width:0.7}));
+  arrows:SYM[r.type]?{to:{enabled:true,scaleFactor:1.0},from:{enabled:true,scaleFactor:1.0}}:{to:{enabled:true,scaleFactor:1.15}},
+  color:{color:ETYPE[r.type],highlight:"#fff",hover:"#fff"},
+  width:Math.max(1.6,(r.magnitude||4)/2),title:r.type+" · mag "+(r.magnitude||"")}));
+// the full transitive web — opt-in (faint, no arrows, sits behind)
+const iEdges=DATA.indirect.map((p,i)=>({id:"i"+i,from:p[0],to:p[1],kind:"ind",dashes:[3,6],
+  arrows:{to:{enabled:false}},color:{color:"#33414f"},width:0.5,smooth:{type:"continuous",roundness:0.35}}));
+// just the clicked node's Prometheux-derived reach — directional (selected -> derived neighbour)
+function nodeIndirect(id){
+  if(!id) return [];
+  return DATA.indirect.filter(p=>p[0]===id||p[1]===id).map((p,i)=>{
+    const other=p[0]===id?p[1]:p[0];
+    return {id:"ni"+i,from:id,to:other,kind:"ind",dashes:[5,5],
+      arrows:{to:{enabled:true,scaleFactor:0.8}},color:{color:"#3fb950"},width:1.3};
+  });
+}
 const edges=new vis.DataSet([]);
-const net=new vis.Network(document.getElementById("net"),{nodes,edges},
-  {physics:{stabilization:true,barnesHut:{springLength:150,gravitationalConstant:-6000}},interaction:{hover:true}});
+const net=new vis.Network(document.getElementById("net"),{nodes,edges},{
+  layout:{improvedLayout:true},
+  physics:{stabilization:{iterations:280},minVelocity:0.6,
+    barnesHut:{springLength:205,springConstant:0.035,gravitationalConstant:-9500,centralGravity:0.32,damping:0.6,avoidOverlap:0.35}},
+  edges:{smooth:{type:"continuous",roundness:0.16}},
+  nodes:{borderWidth:1,borderWidthSelected:3},
+  interaction:{hover:true,tooltipDelay:120,navigationButtons:false}});
+net.once("stabilizationIterationsDone",()=>net.fit({animation:false}));
+window.net=net;  // expose for inspection
 
-const active=new Set(Object.keys(ETYPE)), show={ind:true,exp:false};
+const active=new Set(Object.keys(ETYPE)), show={ind:false,exp:false};
+let selected=null;
 function refresh(){
   const es=dEdges.filter(e=>active.has(e.etype)).slice();
-  if(show.ind) es.push(...iEdges);
+  if(show.ind) es.push(...iEdges);                       // power-user: the full derived web
+  else if(selected) es.push(...nodeIndirect(selected));  // default: only the clicked node's derived reach
   edges.clear(); edges.add(es);
   nodes.update(DATA.nodes.map(n=>{
     const exposed=!!expReason[n.id];
@@ -131,13 +154,21 @@ document.getElementById("insight").innerHTML=`
 
 const info=document.getElementById("info");
 net.on("click",p=>{
-  if(p.edges.length&&!p.nodes.length){const id=p.edges[0];const d=dEdges.find(e=>e.id===id);
+  if(p.nodes.length){                       // node: select it -> reveal its derived links + details
+    const n=p.nodes[0]; selected=n; refresh();
+    const dl=dEdges.filter(e=>e.from===n||e.to===n)
+      .map(e=>`• ${e.from===n?"→ "+lbl(e.to):"← "+lbl(e.from)} <span style="color:${ETYPE[e.etype]}">(${e.etype})</span>`);
+    const ind=DATA.indirect.filter(pr=>pr[0]===n||pr[1]===n).map(pr=>lbl(pr[0]===n?pr[1]:pr[0]));
+    const ex=expReason[n]?`<br><span style="color:#3fb950">AI-exposed:</span> ${expReason[n]}`:"";
+    const indHtml=ind.length?`<br><br><span style="color:#3fb950">↝ ${ind.length} indirect (Prometheux-derived), now dashed:</span><br><span style="color:var(--mut)">${ind.join(", ")}</span>`:"";
+    info.innerHTML=`<b>${lbl(n)}</b>${ex}<br><br><b>direct relations</b><br>${dl.join("<br>")||"(none)"}${indHtml}`;
+  } else if(p.edges.length){                 // edge: show the source fact / mark derived
+    const id=p.edges[0]; const d=dEdges.find(e=>e.id===id);
     if(d) info.innerHTML=`<b>${lbl(d.from)} → ${lbl(d.to)}</b> <span class="tag2" style="background:${ETYPE[d.etype]}">${d.etype}</span><div class="fact">"${d.fact}"</div>`;
     else info.innerHTML=`<b>indirect link</b> <span class="tag2" style="background:#3fb950">Prometheux-derived</span><br>connected only through a chain — in no single fact.`;
-  } else if(p.nodes.length){const n=p.nodes[0];
-    const dl=dEdges.filter(e=>e.from===n||e.to===n).map(e=>`• ${e.from===n?"→ "+lbl(e.to):"← "+lbl(e.from)} (${e.etype})`);
-    const ex=expReason[n]?`<br><span style="color:#3fb950">AI-exposed:</span> ${expReason[n]}`:"";
-    info.innerHTML=`<b>${lbl(n)}</b>${ex}<br>${dl.join("<br>")||"(no direct relations)"}`;}
+  } else {                                   // empty canvas: clear selection -> back to the clean direct view
+    selected=null; refresh(); info.innerHTML="Click a node to reveal its relations and Prometheux-derived links.";
+  }
 });
 refresh();
 </script></body></html>
