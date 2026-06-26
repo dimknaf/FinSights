@@ -1,5 +1,7 @@
 # FinSights
 
+[![FinSights — explainable relationship intelligence dashboard (click to open the live app)](assets/finsights-dashboard.png)](https://multi-agent-hackathon.vercel.app)
+
 ### ▶ Live demo: **https://multi-agent-hackathon.vercel.app**
 
 **Explainable relationship intelligence for markets — powered by [Prometheux](https://www.prometheux.ai/).**
